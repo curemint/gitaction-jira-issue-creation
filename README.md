@@ -33,7 +33,6 @@ job:
           JIRA_TICKET_SUMMARY: ${{ TITLE }}
           JIRA_TICKET_DESCRIPTION: ${{ DESCRIPTION }}
           JIRA_ISSUE_TYPE: ${{ ISSUE_TYPE }} # Bug Or Task
-          JIRA_ISSUE_LINK: ${{ ISSUE_LINK }} # Issue to be linked with the new ticket
           
 ```
 ### References
