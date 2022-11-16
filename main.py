@@ -3,6 +3,7 @@
 # Used JIRA REST API Version 3
 # Ref: https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/
 import os
+import re
 import requests
 from requests.auth import HTTPBasicAuth
 import json
@@ -16,10 +17,7 @@ class Inputs:
     JIRA_TICKET_SUMMARY = os.getenv("JIRA_TICKET_SUMMARY")
     JIRA_TICKET_DESCRIPTION = os.getenv("JIRA_TICKET_DESCRIPTION")
     JIRA_ISSUE_TYPE = os.getenv("JIRA_ISSUE_TYPE")
-    JIRA_ISSUE_LINK = os.getenv("JIRA_ISSUE_LINK")
-
-
-print(f"{Inputs.JIRA_BASE_URL}=")
+    JIRA_ISSUE_LINK = re.findall(r'\[(.*?)\]', JIRA_TICKET_SUMMARY)[0]
 
 createIssueUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issue"
 issueLinkUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issueLink"
@@ -55,7 +53,7 @@ def linkIssue(issueKey):
         {
             "outwardIssue": {"key": issueKey},
             "inwardIssue": {"key": Inputs.JIRA_ISSUE_LINK},
-            "type": {"name": "Duplicate"},
+            "type": {"name": "Relates"},
         }
     )
     linkIssueReponse = requests.request("POST", issueLinkUrl, data=linkIssuePayload, headers=headers, auth=auth)
