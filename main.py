@@ -22,67 +22,64 @@ class Inputs:
     if ticketId:
         JIRA_ISSUE_LINK = ticketId[0]
 
-if Inputs.JIRA_ISSUE_LINK is None:
-    print("Invalid issue id to link!!")
+createIssueUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issue"
+issueLinkUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issueLink"
 
-# createIssueUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issue"
-# issueLinkUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issueLink"
-
-# auth = HTTPBasicAuth(Inputs.JIRA_USER, Inputs.JIRA_USER_TOKEN)
-# headers = {"Accept": "application/json", "Content-Type": "application/json"}
+auth = HTTPBasicAuth(Inputs.JIRA_USER, Inputs.JIRA_USER_TOKEN)
+headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-# def createIssue():
-#     createIssuePayload = json.dumps(
-#         {
-#             "fields": {
-#                 "summary": Inputs.JIRA_TICKET_SUMMARY,
-#                 "issuetype": {"name": Inputs.JIRA_ISSUE_TYPE},
-#                 "project": {"key": Inputs.JIRA_PROJECT},
-#                 "description": {
-#                     "type": "doc",
-#                     "version": 1,
-#                     "content": [
-#                         {"type": "paragraph", "content": [{"text": Inputs.JIRA_TICKET_DESCRIPTION, "type": "text"}]}
-#                     ],
-#                 },
-#             }
-#         }
-#     )
+def createIssue():
+    createIssuePayload = json.dumps(
+        {
+            "fields": {
+                "summary": Inputs.JIRA_TICKET_SUMMARY,
+                "issuetype": {"name": Inputs.JIRA_ISSUE_TYPE},
+                "project": {"key": Inputs.JIRA_PROJECT},
+                "description": {
+                    "type": "doc",
+                    "version": 1,
+                    "content": [
+                        {"type": "paragraph", "content": [{"text": Inputs.JIRA_TICKET_DESCRIPTION, "type": "text"}]}
+                    ],
+                },
+            }
+        }
+    )
 
-#     createIssueResponse = requests.request("POST", createIssueUrl, data=createIssuePayload, headers=headers, auth=auth)
-#     return createIssueResponse
-
-
-# def linkIssue(issueKey):
-#     if Inputs.JIRA_ISSUE_LINK is None:
-#         print("Invalid issue id to link!!")
-#         return
-#     linkIssuePayload = json.dumps(
-#         {
-#             "outwardIssue": {"key": issueKey},
-#             "inwardIssue": {"key": Inputs.JIRA_ISSUE_LINK},
-#             "type": {"name": "Relates"},
-#         }
-#     )
-#     linkIssueReponse = requests.request("POST", issueLinkUrl, data=linkIssuePayload, headers=headers, auth=auth)
-#     if linkIssueReponse.ok:
-#         print(
-#             "Outward Issue : "
-#             + issueKey
-#             + " and Inward Issue : "
-#             + Inputs.JIRA_ISSUE_LINK
-#             + " Issue Linked Successfully!"
-#         )
-#     else:
-#         print("Linking Issues Failed!!")
+    createIssueResponse = requests.request("POST", createIssueUrl, data=createIssuePayload, headers=headers, auth=auth)
+    return createIssueResponse
 
 
-# if __name__ == "__main__":
-#     createIssueResponse = createIssue()
-#     if createIssueResponse.ok:
-#         createdIssueKey = json.loads(createIssueResponse.text)["key"]
-#         print("Key : " + createdIssueKey + " Issue Created Successfully!")
-#         linkIssue(createdIssueKey)
-#     else:
-#         print("Issue not created!!")
+def linkIssue(issueKey):
+    if Inputs.JIRA_ISSUE_LINK is None:
+        print("Invalid issue id to link!!")
+        return
+    linkIssuePayload = json.dumps(
+        {
+            "outwardIssue": {"key": issueKey},
+            "inwardIssue": {"key": Inputs.JIRA_ISSUE_LINK},
+            "type": {"name": "Relates"},
+        }
+    )
+    linkIssueReponse = requests.request("POST", issueLinkUrl, data=linkIssuePayload, headers=headers, auth=auth)
+    if linkIssueReponse.ok:
+        print(
+            "Outward Issue : "
+            + issueKey
+            + " and Inward Issue : "
+            + Inputs.JIRA_ISSUE_LINK
+            + " Issue Linked Successfully!"
+        )
+    else:
+        print("Linking Issues Failed!!")
+
+
+if __name__ == "__main__":
+    createIssueResponse = createIssue()
+    if createIssueResponse.ok:
+        createdIssueKey = json.loads(createIssueResponse.text)["key"]
+        print("Key : " + createdIssueKey + " Issue Created Successfully!")
+        linkIssue(createdIssueKey)
+    else:
+        print("Issue not created!!")
