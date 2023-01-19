@@ -24,6 +24,7 @@ class Inputs:
 
 createIssueUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issue"
 issueLinkUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issueLink"
+getIssueUrl = Inputs.JIRA_BASE_URL + "/rest/api/3/issue/" + Inputs.JIRA_ISSUE_LINK + "?fields=customfield_10056"
 
 auth = HTTPBasicAuth(Inputs.JIRA_USER, Inputs.JIRA_USER_TOKEN)
 headers = {"Accept": "application/json", "Content-Type": "application/json"}
@@ -74,12 +75,23 @@ def linkIssue(issueKey):
     else:
         print("Linking Issues Failed!!")
 
+def isPlatformDependencyEnabled():
+    getIssueUrlResponse = requests.request("GET", getIssueUrl, headers=headers, auth=auth)
+    if getIssueUrlResponse.ok:
+        result = getIssueUrlResponse.json().get('fields').get('customfield_10056')
+        if result is None or result.get('value') == 'No':
+            return False
+        else:
+            return True
 
 if __name__ == "__main__":
-    createIssueResponse = createIssue()
-    if createIssueResponse.ok:
-        createdIssueKey = json.loads(createIssueResponse.text)["key"]
-        print("Key : " + createdIssueKey + " Issue Created Successfully!")
-        linkIssue(createdIssueKey)
+    if not isPlatformDependencyEnabled():
+        createIssueResponse = createIssue()
+        if createIssueResponse.ok:
+            createdIssueKey = json.loads(createIssueResponse.text)["key"]
+            print("Key : " + createdIssueKey + " Issue Created Successfully!")
+            linkIssue(createdIssueKey)
+        else:
+            print("Issue not created!!")
     else:
-        print("Issue not created!!")
+        print("Key : " + Inputs.JIRA_ISSUE_LINK + " Platform dependency already Enabled")
